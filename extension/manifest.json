@@ -1,0 +1,21 @@
+{
+  "manifest_version": 2,
+  "name": "PII Oversharing Detector",
+  "version": "1.0",
+  "description": "Detects PII locally using ONNX",
+  "permissions": ["activeTab"],
+  "background": {
+    "scripts": ["inference.js", "background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    "model/dualHead_student_tinyBERT_optimized.onnx",
+    "tokenizer/tokenizer.json",
+    "tokenizer/vocab.json"
+  ]
+}
