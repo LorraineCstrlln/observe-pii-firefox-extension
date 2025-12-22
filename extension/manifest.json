@@ -5,7 +5,11 @@
   "description": "Detects PII locally using ONNX",
   "permissions": ["activeTab"],
   "background": {
-    "scripts": ["inference.js", "background.js"]
+    "scripts": [
+        "libs/ort.min.js",
+        "inference.js",
+        "background.js"
+    ]
   },
   "content_scripts": [
     {
@@ -13,9 +17,10 @@
       "js": ["content.js"]
     }
   ],
-  "web_accessible_resources": [
-    "model/dualHead_student_tinyBERT_optimized.onnx",
-    "tokenizer/tokenizer.json",
-    "tokenizer/vocab.json"
-  ]
+    "web_accessible_resources": [
+        "model/dualHead_student_tinyBERT_optimized.onnx",
+        "tokenizer/*",
+        "libs/ort-wasm.wasm",
+        "libs/transformers.min.js"
+    ]
 }
