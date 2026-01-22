@@ -1,0 +1,52 @@
+{
+  "model_type": "dualhead-bert",
+  "task": "contextual-detection",
+
+  "heads": {
+    "head1": {
+      "type": "sequence_classification",
+      "num_labels": 2,
+      "id2label": {
+        "0": "NON_CONTEXTUAL",
+        "1": "CONTEXTUAL"
+      }
+    },
+    "head2": {
+      "type": "token_classification",
+      "num_labels": 2,
+      "id2label": {
+        "0": "NON_CONTEXTUAL",
+        "1": "CONTEXTUAL"
+      },
+      "uses_contextual_mask": true
+    }
+  },
+
+  "tokenizer": {
+    "type": "bert",
+    "vocab_file": "vocab.txt",
+    "mask_token": "[MASK]",
+    "cls_token": "[CLS]",
+    "sep_token": "[SEP]",
+    "pad_token": "[PAD]",
+    "unk_token": "[UNK]",
+    "do_lower_case": true,
+    "max_length_head1": 128,
+    "max_length_head2": 256
+  },
+
+  "onnx": {
+    "inputs": [
+      "input_ids_head1",
+      "attention_mask_head1",
+      "input_ids_head2",
+      "attention_mask_head2"
+    ],
+    "outputs": [
+      "logits_head1",
+      "logits_head2",
+      "contextual_mask"
+    ],
+    "opset": 18
+  }
+}
