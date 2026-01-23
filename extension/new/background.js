@@ -4,30 +4,17 @@ import { env, AutoTokenizer } from './lib/transformers.min.js';
 let session = null;
 let tokenizer = null;
 
-async function initTokenizer() {
-    env.localModelPath = browser.runtime.getURL("/");
-    env.useBrowserCache = false;    // disable default caching
-    env.allowRemoteModels = false;  // disable remote models
-    env.allowLocalModels = true;    // enable local models
-
-    if (!tokenizer) {
-        // 'model' is passed since localModelPath is already set to base URL
-        tokenizer = await AutoTokenizer.from_pretrained('model', {});
-    }
-    console.log("Tokenizer Initialized!");
-}
-
 function initOrt() {
     console.log("Initializing ORT...");
     const ort = globalThis.ort;
 
     ort.env.wasm.wasmPaths = {
-    "ort-wasm-simd-threaded.jsep.wasm": browser.runtime.getURL(
-        "lib/ort-wasm-simd-threaded.jsep.wasm"
-    ),
-    "ort-wasm-simd-threaded.jsep.mjs": browser.runtime.getURL(
-        "lib/ort-wasm-simd-threaded.jsep.mjs"
-    )
+        "ort-wasm-simd-threaded.jsep.wasm": browser.runtime.getURL(
+            "lib/ort-wasm-simd-threaded.jsep.wasm"
+        ),
+        "ort-wasm-simd-threaded.jsep.mjs": browser.runtime.getURL(
+            "lib/ort-wasm-simd-threaded.jsep.mjs"
+        )
     };
 
     ort.env.wasm.numThreads = 1;
@@ -52,11 +39,28 @@ async function initSession() {
     session = ortSession;
 }
 
+async function initTokenizer() {
+    env.localModelPath = browser.runtime.getURL("").replace(/\/$/, "");
+    env.useBrowserCache = false;    // disable default caching
+    env.allowRemoteModels = false;  // disable remote models
+    env.allowLocalModels = true;    // enable local models
+
+    if (!tokenizer) {
+        // 'model' is passed since localModelPath is already set to base URL
+        tokenizer = await AutoTokenizer.from_pretrained('model', {
+            local_files_only: true,
+            use_fast: true
+        });
+    }
+
+    console.log("Tokenizer Initialized!");
+}
+
 async function init() {
     initOrt();
     await initSession();
     await initTokenizer();
-    console.log("ORT, Session, and Tokenizer Initialized!");
+    console.log("PII Extension is ready!");
 }
 
 init();

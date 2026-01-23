@@ -1,13 +1,3 @@
-// Testing
-// browser.runtime.sendMessage({
-//     type: "runInference",
-//     text: "Hello world"
-// }).then(response => {
-//     console.log("Model output:", response);
-// }).catch(err => {
-//     console.error("Message failed:", err);
-// });
-
 // Mouse Highlight
 function getSelectedText(){
     const selection = window.getSelection();
@@ -29,7 +19,15 @@ function sendSelectedText(text) {
     })
 }
 
-document.addEventListener("mouseup", () => {
-    const text = getSelectedText();
-    sendSelectedText(text);
-})
+document.addEventListener("pointerup", (event) => {
+    // Only fire on left click
+    if (event.button !== 0) return;
+
+    // Small delay to ensure the selection is fully captured
+    setTimeout(() => {
+        const text = getSelectedText();
+        if (text) {
+            sendSelectedText(text);
+        }
+    }, 50); 
+});
