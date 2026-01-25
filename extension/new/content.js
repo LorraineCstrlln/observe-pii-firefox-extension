@@ -50,9 +50,6 @@ function createPopup() {
     piiPopup = document.createElement("div");
     piiPopup.id = "pii-popup";
 
-    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    piiPopup.classList.add(isDark ? "dark" : "light");
-
     document.body.appendChild(piiPopup);
     return piiPopup;
 }
@@ -69,41 +66,36 @@ function positionPopup(selection) {
 
 function renderPopup(result) {
     const popup = createPopup();
-
     const isPII = result.head1;
 
-    let tokensHTML = "<em style='opacity:0.7;'>No sensitive tokens detected.</em>";
+    let tokensHTML = "<em class='pii-no-tokens'>No sensitive tokens detected.</em>";
 
     if (result.head2 && result.head2.length > 0) {
-        tokensHTML = result.head2.map(t => `
-            <span class="pii-token-chip">${t.token}</span>
-        `).join("");
+        tokensHTML = result.head2.map(t => `<span class="pii-token-chip">${t.token}</span>`).join("");
     }
 
     popup.innerHTML = `
-        <div class="pii-header">
-            <div class="pii-icon ${isPII ? "danger" : "safe"}">
-                ${isPII ? "⚠️" : "✅"}
-            </div>
-            <div>
-                <div style="font-weight:600;">PII Detection</div>
-                <div style="font-size:12px; opacity:0.8;">
-                    ${isPII ? "Sensitive content detected" : "Text appears safe"}
+        <div class="pii-pixel-frame">
+            <div class="pii-header">
+                <div class="pii-icon ${isPII ? "danger" : "safe"}">
+                    ${isPII ? "⚠️" : "✅"}
+                </div>
+                <div>
+                    <div class="pii-header-title">PII Detection</div>
+                    <div class="pii-header-sub">
+                        ${isPII ? "Oops! Sensitive info detected!" : "Text appears safe"}
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div>
-            <strong>Contains PII:</strong>
-            <span style="font-weight:600;">
-                ${isPII ? "Yes" : "No"}
-            </span>
-        </div>
+            <div class="pii-status-row">
+                <strong>Contains PII:</strong>
+                <span class="pii-status ${isPII ? "danger" : "safe"}">${isPII ? "Yes" : "No"}</span>
+            </div>
 
-        <div style="margin-top:6px;">
-            <strong>PII Tokens</strong>
-            <div style="margin-top:6px;">
-                ${tokensHTML}
+            <div class="pii-tokens-section">
+                <strong>PII Tokens</strong>
+                <div class="pii-tokens-container">${tokensHTML}</div>
             </div>
         </div>
     `;
@@ -121,10 +113,7 @@ function highlightTokens(selection, piiTokens) {
     if (!selection.rangeCount) return;
 
     const range = selection.getRangeAt(0);
-
-    // Extract selected content instead of deleting it
     const contents = range.extractContents();
-
     const temp = document.createElement("span");
     temp.appendChild(contents);
 

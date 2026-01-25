@@ -1,102 +1,171 @@
+/* ===================================================== */
+/* 🌌 DARK NEON PINK–PURPLE THEME VARIABLES */
+/* ===================================================== */
 
-/* THEME VARIABLES */
 :root {
-    --pii-bg-light: rgba(255, 255, 255, 0.95);
-    --pii-bg-dark: rgba(25, 25, 28, 0.95);
-    --pii-border-light: #ddd;
-    --pii-border-dark: rgba(255,255,255,0.1);
+    /* Base Panels */
+    --bg-popup: linear-gradient(145deg, rgb(22, 12, 40), rgb(40, 18, 65));
+    --bg-panel-soft: rgba(60, 25, 85, 0.75);
 
-    --safe-gradient: linear-gradient(90deg, #4caf50, #00c853);
-    --danger-gradient: linear-gradient(90deg, #ff4d4d, #ff0080);
+    /* Primary Neon */
+    --neon-pink: rgb(245, 90, 175);
+    --neon-purple: rgb(170, 100, 245);
+    --neon-cyan: rgb(70, 200, 245);
+    --neon-green: rgb(70, 200, 160);
+
+    /* Gradients */
+    --gradient-main: linear-gradient(145deg, rgb(25, 12, 42), rgb(45, 18, 68));
+    --gradient-danger: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+    --gradient-safe: linear-gradient(135deg, var(--neon-cyan), var(--neon-green));
+    --gradient-token: linear-gradient(135deg, rgb(245, 110, 200), rgb(165, 90, 245));
+    --gradient-inline: linear-gradient(135deg, rgb(245, 160, 220), rgb(190, 150, 245));
+
+    /* Text */
+    --text-main: rgb(240, 220, 250);
+    --text-strong: rgb(240, 170, 240);
+    --text-muted: rgb(190, 160, 220);
+
+    /* Glow / Shadow */
+    --glow-pink-soft: 0 0 10px rgba(245, 90, 175, 0.5);
+    --glow-pink-strong: 0 0 18px rgba(245, 90, 175, 0.7);
+    --glow-purple-soft: 0 0 12px rgba(170, 100, 245, 0.5);
+    --glow-purple-strong: 0 0 22px rgba(170, 100, 245, 0.7);
 }
-
-/* POPUP CONTAINER */
+/* ===================================================== */
+/* 📦 POPUP CONTAINER */
+/* ===================================================== */
 #pii-popup {
     position: absolute;
     z-index: 999999;
-    max-width: 340px;
-    padding: 12px;
-    border-radius: 12px;
-    font-family: Inter, Arial, sans-serif;
-    font-size: 13px;
+    width: 380px;
+    font-family: "Press Start 2P", monospace, Arial;
+    font-size: 14px;
+    font-weight: 700;
     display: none;
-    backdrop-filter: blur(6px);
-    transition: opacity 0.25s ease, transform 0.25s ease;
-    transform: scale(0.95);
+    background: var(--gradient-main);
+    color: var(--text-main);
+    border: 3px solid var(--neon-purple);
+    border-radius: 16px;
+    box-shadow: var(--glow-purple-soft), var(--glow-pink-soft);
+    padding: 16px;
     opacity: 0;
+    transform: scale(0.92);
+    transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
-#pii-popup.light {
-    background: var(--pii-bg-light);
-    color: #1f1f1f;
-    border: 1px solid var(--pii-border-light);
-    box-shadow: 0 0 18px rgba(120,120,255,0.25);
+/* Inner frame */
+.pii-pixel-frame {
+    background: var(--bg-panel-soft);
+    border-radius: 12px;
+    padding: 16px;
 }
 
-#pii-popup.dark {
-    background: var(--pii-bg-dark);
-    color: #f5f5f5;
-    border: 1px solid var(--pii-border-dark);
-    box-shadow: 0 0 20px rgba(120,120,255,0.25);
-}
-
-/* HEADER */
+/* ===================================================== */
+/* HEADER TYPOGRAPHY */
+/* ===================================================== */
 .pii-header {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding-bottom: 8px;
-    margin-bottom: 8px;
-    border-bottom: 1px solid rgba(128,128,128,0.2);
+    gap: 12px;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 2px dashed rgba(180, 80, 255, 0.35);
 }
 
+.pii-header-title {
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+.pii-header-sub {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+/* ===================================================== */
+/* ICON */
 .pii-icon {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
-}
-
-.pii-icon.safe {
-    background: var(--safe-gradient);
+    font-size: 20px;
 }
 
 .pii-icon.danger {
-    background: var(--danger-gradient);
+    background: var(--gradient-danger);
+    box-shadow: var(--glow-pink-strong), var(--glow-purple-strong);
 }
 
+.pii-icon.safe {
+    background: var(--gradient-safe);
+    box-shadow: 0 0 18px rgba(80, 220, 255, 0.9);
+}
+
+/* ===================================================== */
+/* PII STATUS */
+.pii-status {
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    margin-left: 8px;
+}
+
+.pii-status.danger {
+    color: var(--neon-pink);
+    text-shadow: var(--glow-pink-strong);
+}
+
+.pii-status.safe {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 14px rgba(80, 220, 255, 0.8);
+}
+
+/* ===================================================== */
 /* TOKEN CHIPS */
 .pii-token-chip {
-    background: linear-gradient(135deg, #ff6a6a, #ff2d95);
+    background: var(--gradient-token);
     color: white;
     border-radius: 999px;
-    padding: 4px 10px;
-    margin: 3px;
+    padding: 8px 16px;
+    margin: 6px;
     display: inline-block;
     font-size: 12px;
-    box-shadow: 0 0 8px rgba(255,80,150,0.5);
+    font-weight: 900;
+    letter-spacing: 0.6px;
+    box-shadow: var(--glow-pink-soft);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .pii-token-chip:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 12px rgba(255,80,150,0.8);
+    transform: scale(1.1);
+    box-shadow: var(--glow-purple-strong);
 }
 
+/* ===================================================== */
 /* INLINE HIGHLIGHT */
 .pii-inline {
-    background: linear-gradient(135deg, #ff9a9e, #fad0c4);
-    border-radius: 4px;
-    padding: 1px 3px;
-    box-shadow: 0 0 6px rgba(255,120,120,0.6);
+    background: var(--gradient-inline);
+    color: rgb(40, 0, 60);
+    font-weight: 900;
+    border-radius: 6px;
+    padding: 2px 5px;
+    box-shadow: var(--glow-pink-soft);
     animation: piiPulse 1.2s ease-out;
 }
 
 @keyframes piiPulse {
-    0%   { box-shadow: 0 0 0 rgba(255,120,120,0.0); }
-    50%  { box-shadow: 0 0 10px rgba(255,120,120,0.7); }
-    100% { box-shadow: 0 0 0 rgba(255,120,120,0.0); }
+    0%   { box-shadow: 0 0 0 rgba(255, 60, 160, 0); }
+    50%  { box-shadow: 0 0 18px rgba(255, 60, 160, 0.9); }
+    100% { box-shadow: 0 0 0 rgba(255, 60, 160, 0); }
+}
+
+/* No tokens detected message */
+.pii-no-tokens {
+    font-style: italic;
+    color: var(--text-muted);
 }
