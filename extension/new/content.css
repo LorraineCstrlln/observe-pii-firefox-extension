@@ -1,170 +1,138 @@
-/* ===================================================== */
-/* 🌌 DARK NEON PINK–PURPLE THEME VARIABLES */
-/* ===================================================== */
-
 :root {
     /* Base Panels */
-    --bg-popup: linear-gradient(145deg, rgb(22, 12, 40), rgb(40, 18, 65));
-    --bg-panel-soft: rgba(60, 25, 85, 0.75);
+    --bg-popup: linear-gradient(145deg, #1f1b2e, #2a2540);
+    --bg-panel-soft: rgba(255, 255, 255, 0.04);
 
-    /* Primary Neon */
-    --neon-pink: rgb(245, 90, 175);
-    --neon-purple: rgb(170, 100, 245);
-    --neon-cyan: rgb(70, 200, 245);
-    --neon-green: rgb(70, 200, 160);
+    /* Status Colors */
+    --danger-main: #c97a8a;
+    --danger-bg: #3a1f28;
 
-    /* Gradients */
-    --gradient-main: linear-gradient(145deg, rgb(25, 12, 42), rgb(45, 18, 68));
-    --gradient-danger: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
-    --gradient-safe: linear-gradient(135deg, var(--neon-cyan), var(--neon-green));
-    --gradient-token: linear-gradient(135deg, rgb(245, 110, 200), rgb(165, 90, 245));
-    --gradient-inline: linear-gradient(135deg, rgb(245, 160, 220), rgb(190, 150, 245));
+    --safe-main: #7fb6b0;
+    --safe-bg: #1f3433;
+
+    /* Accents */
+    --accent-border: #4a4370;
+    --accent-soft: #6b63a3;
 
     /* Text */
-    --text-main: rgb(240, 220, 250);
-    --text-strong: rgb(240, 170, 240);
-    --text-muted: rgb(190, 160, 220);
+    --text-main: #f0edf7;
+    --text-strong: #ffffff;
+    --text-muted: #b6b0d4;
 
-    /* Glow / Shadow */
-    --glow-pink-soft: 0 0 10px rgba(245, 90, 175, 0.5);
-    --glow-pink-strong: 0 0 18px rgba(245, 90, 175, 0.7);
-    --glow-purple-soft: 0 0 12px rgba(170, 100, 245, 0.5);
-    --glow-purple-strong: 0 0 22px rgba(170, 100, 245, 0.7);
+    /* Shadows */
+    --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.35);
+    --shadow-inner: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
-/* ===================================================== */
-/* 📦 POPUP CONTAINER */
-/* ===================================================== */
+
+/* POPUP CONTAINER */
 #pii-popup {
     position: absolute;
     z-index: 999999;
     width: 380px;
-    font-family: "Press Start 2P", monospace, Arial;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, Arial;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 500;
     display: none;
-    background: var(--gradient-main);
+    background: var(--bg-popup);
     color: var(--text-main);
-    border: 3px solid var(--neon-purple);
-    border-radius: 16px;
-    box-shadow: var(--glow-purple-soft), var(--glow-pink-soft);
+    border: 1px solid var(--accent-border);
+    border-radius: 14px;
+    box-shadow: var(--shadow-soft);
     padding: 16px;
     opacity: 0;
-    transform: scale(0.92);
-    transition: opacity 0.25s ease, transform 0.25s ease;
+    transform: translateY(4px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 /* Inner frame */
 .pii-pixel-frame {
     background: var(--bg-panel-soft);
-    border-radius: 12px;
+    border-radius: 10px;
     padding: 16px;
+    box-shadow: var(--shadow-inner);
 }
 
-/* ===================================================== */
-/* HEADER TYPOGRAPHY */
-/* ===================================================== */
+/* HEADER */
 .pii-header {
     display: flex;
     align-items: center;
     gap: 12px;
     padding-bottom: 12px;
     margin-bottom: 12px;
-    border-bottom: 2px dashed rgba(180, 80, 255, 0.35);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .pii-header-title {
-    font-size: 16px;
-    font-weight: 900;
-    letter-spacing: 1px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-strong);
 }
 
 .pii-header-sub {
-    font-size: 13px;
-    font-weight: 700;
+    font-size: 12px;
     color: var(--text-muted);
 }
 
-/* ===================================================== */
 /* ICON */
 .pii-icon {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
+    font-size: 18px;
+    flex-shrink: 0;
 }
 
 .pii-icon.danger {
-    background: var(--gradient-danger);
-    box-shadow: var(--glow-pink-strong), var(--glow-purple-strong);
+    background: var(--danger-bg);
+    color: var(--danger-main);
 }
 
 .pii-icon.safe {
-    background: var(--gradient-safe);
-    box-shadow: 0 0 18px rgba(80, 220, 255, 0.9);
+    background: var(--safe-bg);
+    color: var(--safe-main);
 }
 
-/* ===================================================== */
 /* PII STATUS */
 .pii-status {
-    font-size: 18px;
-    font-weight: 900;
-    letter-spacing: 1px;
-    margin-left: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    margin-left: 6px;
 }
 
 .pii-status.danger {
-    color: var(--neon-pink);
-    text-shadow: var(--glow-pink-strong);
+    color: var(--danger-main);
 }
 
 .pii-status.safe {
-    color: var(--neon-cyan);
-    text-shadow: 0 0 14px rgba(80, 220, 255, 0.8);
+    color: var(--safe-main);
 }
 
-/* ===================================================== */
 /* TOKEN CHIPS */
 .pii-token-chip {
-    background: var(--gradient-token);
-    color: white;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-main);
     border-radius: 999px;
-    padding: 8px 16px;
+    padding: 6px 12px;
     margin: 6px;
     display: inline-block;
     font-size: 12px;
-    font-weight: 900;
-    letter-spacing: 0.6px;
-    box-shadow: var(--glow-pink-soft);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.pii-token-chip:hover {
-    transform: scale(1.1);
-    box-shadow: var(--glow-purple-strong);
-}
-
-/* ===================================================== */
 /* INLINE HIGHLIGHT */
 .pii-inline {
-    background: var(--gradient-inline);
-    color: rgb(40, 0, 60);
-    font-weight: 900;
-    border-radius: 6px;
+    background: rgba(201, 122, 138, 0.25);
+    color: #f8eaea;
+    font-weight: 600;
+    border-radius: 4px;
     padding: 2px 5px;
-    box-shadow: var(--glow-pink-soft);
-    animation: piiPulse 1.2s ease-out;
 }
 
-@keyframes piiPulse {
-    0%   { box-shadow: 0 0 0 rgba(255, 60, 160, 0); }
-    50%  { box-shadow: 0 0 18px rgba(255, 60, 160, 0.9); }
-    100% { box-shadow: 0 0 0 rgba(255, 60, 160, 0); }
-}
-
-/* No tokens detected message */
+/* NO TOKENS */
 .pii-no-tokens {
     font-style: italic;
     color: var(--text-muted);
