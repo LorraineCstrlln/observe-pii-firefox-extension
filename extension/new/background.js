@@ -4,6 +4,7 @@ import { env, AutoTokenizer } from './lib/transformers.min.js';
 let session = null;
 let tokenizer = null;
 
+// sets up the AI engine (ONNX runtime)
 function initOrt() {
     console.log("Initializing ORT...");
     const ort = globalThis.ort;
@@ -22,6 +23,7 @@ function initOrt() {
     console.log("ORT Initialized!");
 }
 
+// load trained AI knowledge
 async function initSession() {
 
     console.log("Initializing ONNX Model Session...")

@@ -1,3 +1,4 @@
+// Split text into chunks (max 128 tokens)
 export async function getTokenChunks(tokenizer, text, max_length=128) {
     let encoded = await tokenizer(text, {
         padding: false,            
@@ -61,6 +62,7 @@ export async function getTokenChunks(tokenizer, text, max_length=128) {
     return chunks;
 }
 
+// Convert raw number into probabilities
 export function softMax(logits) {
     // Subtract max for numerical stability (plugging in to exp() can diverge)
     const max = Math.max(...logits);
@@ -75,6 +77,7 @@ export function softMax(logits) {
     return probs
 }
 
+// Combine tokens
 export function mergeSubwords(tokens, offsets) {
     if(!tokens || !offsets ) return [];
 
