@@ -1,98 +1,141 @@
-
-/* THEME VARIABLES */
 :root {
-    --pii-bg-light: rgba(255, 255, 255, 0.95);
-    --pii-bg-dark: rgba(25, 25, 28, 0.95);
-    --pii-border-light: #ddd;
-    --pii-border-dark: rgba(255,255,255,0.1);
+    /* Base Panels */
+    --bg-popup: linear-gradient(145deg, #1f1b2e, #2a2540);
+    --bg-panel-soft: rgba(255, 255, 255, 0.04);
 
-    --safe-gradient: linear-gradient(90deg, #4caf50, #00c853);
-    --danger-gradient: linear-gradient(90deg, #ff4d4d, #ff0080);
+    /* Status Colors */
+    --danger-main: #c97a8a;
+    --danger-bg: #3a1f28;
+
+    --safe-main: #7fb6b0;
+    --safe-bg: #1f3433;
+
+    /* Accents */
+    --accent-border: #4a4370;
+    --accent-soft: #6b63a3;
+
+    /* Text */
+    --text-main: #f0edf7;
+    --text-strong: #ffffff;
+    --text-muted: #b6b0d4;
+
+    /* Shadows */
+    --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.35);
+    --shadow-inner: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
 /* POPUP CONTAINER */
 #pii-popup {
     position: absolute;
     z-index: 999999;
-    max-width: 340px;
-    padding: 12px;
-    border-radius: 12px;
-    font-family: Inter, Arial, sans-serif;
-    font-size: 13px;
+    width: 380px;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, Arial;
+    font-size: 14px;
+    font-weight: 500;
     display: none;
-    backdrop-filter: blur(6px);
-    transition: opacity 0.25s ease, transform 0.25s ease;
-    transform: scale(0.95);
+    background: var(--bg-popup);
+    color: var(--text-main);
+    border: 1px solid var(--accent-border);
+    border-radius: 14px;
+    box-shadow: var(--shadow-soft);
+    padding: 16px;
     opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-#pii-popup.light {
-    background: var(--pii-bg-light);
-    color: #1f1f1f;
-    border: 1px solid var(--pii-border-light);
-    box-shadow: 0 0 18px rgba(120,120,255,0.25);
-}
-
-#pii-popup.dark {
-    background: var(--pii-bg-dark);
-    color: #f5f5f5;
-    border: 1px solid var(--pii-border-dark);
-    box-shadow: 0 0 20px rgba(120,120,255,0.25);
+/* Inner frame */
+.pii-pixel-frame {
+    background: var(--bg-panel-soft);
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: var(--shadow-inner);
 }
 
 /* HEADER */
 .pii-header {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding-bottom: 8px;
-    margin-bottom: 8px;
-    border-bottom: 1px solid rgba(128,128,128,0.2);
+    gap: 12px;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.pii-header-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-strong);
+}
+
+.pii-header-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* ICON */
 .pii-icon {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
-}
-
-.pii-icon.safe {
-    background: var(--safe-gradient);
+    font-size: 18px;
+    flex-shrink: 0;
 }
 
 .pii-icon.danger {
-    background: var(--danger-gradient);
+    background: var(--danger-bg);
+    color: var(--danger-main);
+}
+
+.pii-icon.safe {
+    background: var(--safe-bg);
+    color: var(--safe-main);
+}
+
+/* PII STATUS */
+.pii-status {
+    font-size: 15px;
+    font-weight: 700;
+    margin-left: 6px;
+}
+
+.pii-status.danger {
+    color: var(--danger-main);
+}
+
+.pii-status.safe {
+    color: var(--safe-main);
 }
 
 /* TOKEN CHIPS */
 .pii-token-chip {
-    background: linear-gradient(135deg, #ff6a6a, #ff2d95);
-    color: white;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-main);
     border-radius: 999px;
-    padding: 4px 10px;
-    margin: 3px;
+    padding: 6px 12px;
+    margin: 6px;
     display: inline-block;
     font-size: 12px;
-    box-shadow: 0 0 8px rgba(255,80,150,0.5);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.pii-token-chip:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 12px rgba(255,80,150,0.8);
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 /* INLINE HIGHLIGHT */
 .pii-inline {
-    background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+    background: rgba(201, 122, 138, 0.25);
+    color: #f8eaea;
+    font-weight: 600;
     border-radius: 4px;
-    padding: 1px 3px;
-    box-shadow: 0 0 6px rgba(255,120,120,0.6);
-    animation: piiPulse 1.2s ease-out;
+    padding: 2px 5px;
+}
+
+/* NO TOKENS */
+.pii-no-tokens {
+    font-style: italic;
+    color: var(--text-muted);
 }
 
 @keyframes piiPulse {
