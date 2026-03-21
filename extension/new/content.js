@@ -14,6 +14,16 @@
     document.head.appendChild(link);
 })();
 
+const UI = {};
+const Position = {};
+const Select = {};
+const Core = {};
+
+// const UI = { createIcon, createPopup };
+// const Position = { center, icon, popup };
+// const Select = { getText };
+// const Core = { highlight, renderPopup, sendText };
+
 // 2. GLOBAL STATE
 let piiIcon = null;
 let piiPopup = null;
@@ -21,50 +31,54 @@ let piiIconConsumed = false;   // prevent duplicate triggers for the same select
 let lastSelectedText = "";     // used to detect if the selection actually changed
 
 // 3. SELECTION UTILITIES
-function getSelectedText() {
+Select.getText = function () {
     const activeEl = document.activeElement;
     // Case 1: input or textarea
     if (activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA")) {
         const start = activeEl.selectionStart;
         const end = activeEl.selectionEnd;
-
-        if (start !== end) {
-            return activeEl.value.substring(start, end).trim();
-        }
-        return "";
+        return (start !== end) ? activeEl.value.substring(start, end).trim() : "";
     }
     // Case 2: normal DOM selection
     const selection = window.getSelection();
     return selection ? selection.toString().trim() : "";
-}
+};
  
 // 4. POSITIONING LOGIC
-function positionAtCenter(element) {
+Position.center = function (element) {
     element.style.top = `${window.scrollY + window.innerHeight / 2}px`;
     element.style.left = `${window.scrollX + window.innerWidth / 2}px`;
-}
+};
 
-function positionIcon(selection) {
+Position.icon = function (selection) {
+    if (!selection || selection.rangeCount === 0) return;
+
     const range = selection.getRangeAt(0);
     const rects = range.getClientRects();
-    const lastRect = rects[rects.length - 1]; 
-    const icon = createIcon();
+
+    if (!rects.length) return;
+    const lastRect = rects[rects.length - 1];
+    const icon = UI.createIcon();
 
     icon.style.top = `${window.scrollY + lastRect.bottom + 5}px`;
     icon.style.left = `${window.scrollX + lastRect.right}px`;
-}
+};
 
-function positionPopup(selection) {
+Position.popup = function (selection) {
+    if (!selection || selection.rangeCount === 0) return;
+
     const range = selection.getRangeAt(0);
     const rect = range.getBoundingClientRect();
-    const popup = createPopup();
+
+    if (!rect) return;
+    const popup = UI.createPopup();
 
     popup.style.top = `${window.scrollY + rect.bottom + 8}px`;
     popup.style.left = `${window.scrollX + rect.left}px`;
 }
 
 // 5. DOM ELEMENT CREATION (SINGLETONS)
-function createIcon() {
+UI.createIcon = function () {
     if (piiIcon) return piiIcon;
     piiIcon = document.createElement("div");
     piiIcon.id = "pii-icon-floating";
@@ -73,7 +87,7 @@ function createIcon() {
     return piiIcon;
 }
 
-function createPopup() {
+UI.createPopup = function () {
     if (piiPopup) return piiPopup;
     piiPopup = document.createElement("div");
     piiPopup.id = "pii-popup";
@@ -83,7 +97,7 @@ function createPopup() {
 
 // 6. CORE FUNCTIONALITY AND RENDERING
 // Highlighting logic: Wraps detected PII tokens in <span class="pii-inline">
-function highlightTokens(selection, piiTokens) {
+Core.highlight = function (selection, piiTokens) {
     if (!piiTokens || piiTokens.length === 0 || !selection.rangeCount) return;
 
     const range = selection.getRangeAt(0);
@@ -139,8 +153,8 @@ function highlightTokens(selection, piiTokens) {
 }
 
 // Builds and displays the detailed PII info popup
-function renderPopup(result) {
-    const popup = createPopup();
+Core.renderPopup = function (result) {
+    const popup = UI.createPopup();
     const isPII = result.head1;
 
     let tokensHTML = "<em class='pii-no-tokens'>No sensitive tokens detected.</em>";
@@ -183,7 +197,7 @@ function renderPopup(result) {
 }
 
 // Sends text to background.js for AI analysis
-function sendSelectedText(text, context = {}) {
+Core.sendText = function (text, context = {}) {
     if (!text || piiIconConsumed) return;
 
     context = context || {};
@@ -209,12 +223,12 @@ function sendSelectedText(text, context = {}) {
         window.piiLastContext = context;
 
         if (!context?.isInput && selection && selection.rangeCount > 0) {
-            positionIcon(selection);
+            Position.icon(selection);
         } else {
-            positionAtCenter(createIcon());
+            Position.center(UI.createIcon());
         }
 
-        const icon = createIcon();
+        const icon = UI.createIcon();
         icon.style.opacity = "0";
         icon.style.display = "flex";
 
@@ -230,7 +244,7 @@ function sendSelectedText(text, context = {}) {
 
 // 7. EVENT LISTENERS
 // ICON CLICK: Triggers the actual highlighting and shows the detailed popup
-const icon = createIcon();
+const icon = UI.createIcon();
 icon.addEventListener("click", (e) => {
     e.stopPropagation(); 
 
@@ -253,14 +267,14 @@ icon.addEventListener("click", (e) => {
         selection.removeAllRanges();
         selection.addRange(range);
 
-        highlightTokens(selection, result.head2);
-        positionPopup(selection);
+        Core.highlight(selection, result.head2);
+        Position.popup(selection);
     } else {
         // For inputs: just show popup in center
-        positionAtCenter(createPopup());
+        Position.center(UI.createPopup());
     }
 
-    renderPopup(result);
+    Core.renderPopup(result);
 });
 
 // DISMISSAL: Hides UI when clicking elsewhere
@@ -283,7 +297,7 @@ document.addEventListener("pointerup", (event) => {
     const isEditable = activeEl && activeEl.isContentEditable;
 
     setTimeout(() => {
-        const text = getSelectedText();
+        const text = Select.getText();
 
         if (text && text.length > 1) {
 
@@ -291,7 +305,7 @@ document.addEventListener("pointerup", (event) => {
                 piiIconConsumed = false;
                 lastSelectedText = text;
             }
-            sendSelectedText(text, { isInput, isEditable });
+            Core.sendText(text, { isInput, isEditable });
         } else {
             if (piiIcon) piiIcon.style.display = "none";
         }
