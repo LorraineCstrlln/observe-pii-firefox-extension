@@ -1,26 +1,28 @@
+// PII DETECTION CONTENT SCRIPT
+// 1. Monitor user text selection (DOM and Inputs).
+// 2. Communicate with background.js for inference.
+// 3. Render floating UI elements (Warning Icon & Results Popup).
+ 
+// 1. INITIALIZATION: Inject Stylesheet
 (function injectPIICSS() {
     if (document.getElementById("pii-css")) return;
-
     const link = document.createElement("link");
     link.id = "pii-css";
     link.rel = "stylesheet";
     link.type = "text/css";
     link.href = browser.runtime.getURL("content.css");
-
     document.head.appendChild(link);
 })();
 
-// GLOBAL STATE
+// 2. GLOBAL STATE
 let piiIcon = null;
 let piiPopup = null;
+let piiIconConsumed = false;   // prevent duplicate triggers for the same selection
+let lastSelectedText = "";     // used to detect if the selection actually changed
 
-let piiIconConsumed = false;   // tracks if icon was already clicked
-let lastSelectedText = "";     // tracks last selection
-
-// Gets what user highlighted
+// 3. SELECTION UTILITIES
 function getSelectedText() {
     const activeEl = document.activeElement;
-
     // Case 1: input or textarea
     if (activeEl && (activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA")) {
         const start = activeEl.selectionStart;
@@ -31,72 +33,56 @@ function getSelectedText() {
         }
         return "";
     }
-
     // Case 2: normal DOM selection
     const selection = window.getSelection();
     return selection ? selection.toString().trim() : "";
 }
+ 
+// 4. POSITIONING LOGIC
+function positionAtCenter(element) {
+    element.style.top = `${window.scrollY + window.innerHeight / 2}px`;
+    element.style.left = `${window.scrollX + window.innerWidth / 2}px`;
+}
 
-function positionIconNearCursor() {
+function positionIcon(selection) {
+    const range = selection.getRangeAt(0);
+    const rects = range.getClientRects();
+    const lastRect = rects[rects.length - 1]; 
     const icon = createIcon();
 
-    icon.style.top = `${window.scrollY + window.innerHeight / 2}px`;
-    icon.style.left = `${window.scrollX + window.innerWidth / 2}px`;
+    icon.style.top = `${window.scrollY + lastRect.bottom + 5}px`;
+    icon.style.left = `${window.scrollX + lastRect.right}px`;
 }
 
-function positionPopupFallback() {
+function positionPopup(selection) {
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
     const popup = createPopup();
 
-    popup.style.top = `${window.scrollY + window.innerHeight / 2}px`;
-    popup.style.left = `${window.scrollX + window.innerWidth / 2}px`;
+    popup.style.top = `${window.scrollY + rect.bottom + 8}px`;
+    popup.style.left = `${window.scrollX + rect.left}px`;
 }
 
-// Sends selected text to background.js
-function sendSelectedText(text, context = {}) {
-    if (!text || piiIconConsumed) return;
-
-    context = context || {};
-
-    if (piiIcon) piiIcon.style.display = "none";
-
-    browser.runtime.sendMessage({
-        type: "runInference",
-        text: text
-    }).then(response => { 
-        if (!response || !response.text) return;
-
-        const selection = window.getSelection();
-
-        if (!context?.isInput) {
-            if (!selection || selection.rangeCount === 0) return;
-            window.piiLastRange = selection.getRangeAt(0).cloneRange();
-        } else {
-            window.piiLastRange = null;
-        }
-
-        window.piiLastResult = response.text;
-        window.piiLastContext = context;
-
-        if (!context?.isInput && selection && selection.rangeCount > 0) {
-            positionIcon(selection);
-        } else {
-            positionIconNearCursor();
-        }
-
-        const icon = createIcon();
-        icon.style.opacity = "0";
-        icon.style.display = "flex";
-
-        requestAnimationFrame(() => {
-            icon.style.transition = "opacity 0.2s ease-in-out, transform 0.2s ease-out";
-            icon.style.opacity = "1";
-        });
-
-    }).catch(err => {
-        console.error("Failed to send text:", err);
-    });
+// 5. DOM ELEMENT CREATION (SINGLETONS)
+function createIcon() {
+    if (piiIcon) return piiIcon;
+    piiIcon = document.createElement("div");
+    piiIcon.id = "pii-icon-floating";
+    piiIcon.innerHTML = "⚠️";
+    document.body.appendChild(piiIcon);
+    return piiIcon;
 }
-// Highlight words inside text
+
+function createPopup() {
+    if (piiPopup) return piiPopup;
+    piiPopup = document.createElement("div");
+    piiPopup.id = "pii-popup";
+    document.body.appendChild(piiPopup);
+    return piiPopup;
+}
+
+// 6. CORE FUNCTIONALITY AND RENDERING
+// Highlighting logic: Wraps detected PII tokens in <span class="pii-inline">
 function highlightTokens(selection, piiTokens) {
     if (!piiTokens || piiTokens.length === 0 || !selection.rangeCount) return;
 
@@ -152,52 +138,7 @@ function highlightTokens(selection, piiTokens) {
     selection.removeAllRanges(); // Clear selection to stop recursive loops
 }
 
-// Icon Position
-function positionIcon(selection) {
-    const range = selection.getRangeAt(0);
-    const rects = range.getClientRects();
-    // Use the last rect to place the icon at the end of the selection
-    const lastRect = rects[rects.length - 1]; 
-    const icon = createIcon();
-
-    icon.style.top = `${window.scrollY + lastRect.bottom + 5}px`;
-    icon.style.left = `${window.scrollX + lastRect.right}px`;
-}
-
-// Icon container
-function createIcon() {
-    if (piiIcon) return piiIcon;
-
-    piiIcon = document.createElement("div");
-    piiIcon.id = "pii-icon-floating";
-    piiIcon.innerHTML = "⚠️";
-
-    document.body.appendChild(piiIcon);
-    return piiIcon;
-}
-
-
-// Main popup positions 
-function positionPopup(selection) {
-    const range = selection.getRangeAt(0);
-    const rect = range.getBoundingClientRect(); //gets position of highlighted text
-    const popup = createPopup();
-
-    popup.style.top = `${window.scrollY + rect.bottom + 8}px`;
-    popup.style.left = `${window.scrollX + rect.left}px`;
-}
-
-// Main popup container
-function createPopup() {
-    if (piiPopup) return piiPopup;
-
-    piiPopup = document.createElement("div");
-    piiPopup.id = "pii-popup";
-
-    document.body.appendChild(piiPopup);
-    return piiPopup;
-}
-
+// Builds and displays the detailed PII info popup
 function renderPopup(result) {
     const popup = createPopup();
     const isPII = result.head1;
@@ -241,6 +182,54 @@ function renderPopup(result) {
     });
 }
 
+// Sends text to background.js for AI analysis
+function sendSelectedText(text, context = {}) {
+    if (!text || piiIconConsumed) return;
+
+    context = context || {};
+
+    if (piiIcon) piiIcon.style.display = "none";
+
+    browser.runtime.sendMessage({
+        type: "runInference",
+        text: text
+    }).then(response => { 
+        if (!response || !response.text) return;
+
+        const selection = window.getSelection();
+
+        if (!context?.isInput) {
+            if (!selection || selection.rangeCount === 0) return;
+            window.piiLastRange = selection.getRangeAt(0).cloneRange();
+        } else {
+            window.piiLastRange = null;
+        }
+
+        window.piiLastResult = response.text;
+        window.piiLastContext = context;
+
+        if (!context?.isInput && selection && selection.rangeCount > 0) {
+            positionIcon(selection);
+        } else {
+            positionAtCenter(createIcon());
+        }
+
+        const icon = createIcon();
+        icon.style.opacity = "0";
+        icon.style.display = "flex";
+
+        requestAnimationFrame(() => {
+            icon.style.transition = "opacity 0.2s ease-in-out, transform 0.2s ease-out";
+            icon.style.opacity = "1";
+        });
+
+    }).catch(err => {
+        console.error("Failed to send text:", err);
+    });
+}
+
+// 7. EVENT LISTENERS
+// ICON CLICK: Triggers the actual highlighting and shows the detailed popup
 const icon = createIcon();
 icon.addEventListener("click", (e) => {
     e.stopPropagation(); 
@@ -268,12 +257,13 @@ icon.addEventListener("click", (e) => {
         positionPopup(selection);
     } else {
         // For inputs: just show popup in center
-        positionPopupFallback();
+        positionAtCenter(createPopup());
     }
 
     renderPopup(result);
 });
 
+// DISMISSAL: Hides UI when clicking elsewhere
 document.addEventListener("pointerdown", (e) => {
     // Hide everything as soon as the user starts a new interaction
     if (piiIcon && !piiIcon.contains(e.target)) {
@@ -284,6 +274,7 @@ document.addEventListener("pointerdown", (e) => {
     }
 });
 
+// SELECTION TRIGGER: Detects when the user finishes selecting text
 document.addEventListener("pointerup", (event) => {
     if (event.button !== 0) return;
 
