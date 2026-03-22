@@ -96,7 +96,7 @@ browser.runtime.onMessage.addListener(async (msg, _) => {
         try {
             // runInference is imported from inference.js
             const results = await runInference(session, tokenizer, msg.text);
-            return { status: "success", text: results };
+            return { status: "success", piiTokens: results };
         } catch (err) {
             console.error("Inference Error:", err);
             return { status: "error", error: err.message };

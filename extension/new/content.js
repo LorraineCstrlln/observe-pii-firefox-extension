@@ -208,7 +208,7 @@ Core.sendText = function (text, context = {}) {
         type: "runInference",
         text: text
     }).then(response => { 
-        if (!response || !response.text) return;
+        if (!response || response.status !== "success" || !response.piiTokens) return;
 
         const selection = window.getSelection();
 
@@ -219,7 +219,7 @@ Core.sendText = function (text, context = {}) {
             window.piiLastRange = null;
         }
 
-        window.piiLastResult = response.text;
+        window.piiLastResult = response.piiTokens;
         window.piiLastContext = context;
 
         if (!context?.isInput && selection && selection.rangeCount > 0) {
@@ -267,7 +267,9 @@ icon.addEventListener("click", (e) => {
         selection.removeAllRanges();
         selection.addRange(range);
 
-        Core.highlight(selection, result.head2);
+        if (result.head2 && result.head2.length > 0) {
+            Core.highlight(selection, result.head2);
+        }
         Position.popup(selection);
     } else {
         // For inputs: just show popup in center
