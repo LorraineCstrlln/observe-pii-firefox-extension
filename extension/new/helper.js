@@ -78,7 +78,7 @@ export function softMax(logits) {
 }
 
 // Combine tokens
-export function mergeSubwords(tokens, offsets) {
+export function mergeSubwords(tokens, offsets, threshold) {
     if(!tokens || !offsets ) return [];
 
     const merged = [];
@@ -87,19 +87,27 @@ export function mergeSubwords(tokens, offsets) {
     tokens.forEach((t, i) => {
         if(!t) return;
         const [start, end] = offsets[i];
+        const maxPII = t.maxPII;
 
         if(t.token === "[CLS]" || t.token === "[SEP]" || (start === 0 && end === 0)) return;
         if(t.token.startsWith("##")) {
             if(buffer) {
                 buffer.token += t.token.slice(2); // remove '##'
-                buffer.probs = Math.max(buffer.prob, t.probs[1]);
+                // buffer.probs = Math.max(buffer.probs, t.probs[1]); // binary logic
+
+                if (maxPII > buffer.probs) {
+                    buffer.probs = maxPII;
+                    buffer.label = t.label;
+                }
+
                 buffer.end = end;
             }
         } else {
-            if (buffer && buffer.isContextual) merged.push(buffer);
+            if (buffer && buffer.probs > threshold) merged.push(buffer);
             buffer = { 
                 token: t.token, 
-                probs: t.probs[1], // Probability of being PII
+                probs: maxPII, // Probability of being PII -> t.probs[1] for binary
+                label: t.label,
                 start: start,
                 end: end,
                 isContextual: t.isContextual
@@ -107,6 +115,7 @@ export function mergeSubwords(tokens, offsets) {
         }
     });
 
-    if (buffer && buffer.isContextual) merged.push(buffer);
+    // if (buffer && buffer.isContextual) merged.push(buffer);
+    if (buffer && buffer.probs > threshold) merged.push(buffer);
     return merged;
 }
