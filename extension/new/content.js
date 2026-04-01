@@ -174,6 +174,7 @@ Core.renderPopup = function (result) {
     const isPII = result.head1;
 
     let tokensHTML = "<em class='pii-no-tokens'>No sensitive tokens detected.</em>";
+    let newcat;
 
     if (result.head2 && result.head2.length > 0) {
         // tokensHTML = result.head2.map(t => `<span class="pii-token-chip">${t.token}</span>`).join("");
@@ -183,6 +184,12 @@ Core.renderPopup = function (result) {
             const labelName = LABEL_MAP[t.label] || "Other";  // fallback
             return `<span class="pii-token-chip">${t.token} (${labelName})</span>`;
         }).join("");
+
+        const categories = [...new Set(
+            result.head2.map(t => LABEL_MAP[t.label] || "Other")
+        )];
+        newcat = categories.join(", ");
+
     }
 
     popup.innerHTML = `
@@ -205,11 +212,15 @@ Core.renderPopup = function (result) {
             </div>
 
             <div class="pii-tokens-section">
-                <strong>PII Tokens</strong>
-                <div class="pii-tokens-container">${tokensHTML}</div>
+                <strong>Categories:</strong>
+                <div class="pii-tokens-container">${newcat || "None"}</div>
             </div>
         </div>
     `;
+            // <div class="pii-tokens-section">
+            //     <strong>PII Tokens:</strong>
+            //     <div class="pii-tokens-container">${tokensHTML}</div>
+            // </div>
 
     popup.style.display = "block";
     requestAnimationFrame(() => {
