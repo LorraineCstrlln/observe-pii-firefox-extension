@@ -1,18 +1,3 @@
-// Multi-class Mapping
-const LABEL_MAP = [
-  "Other",
-  "Name_Relationship",
-  "Email_Accounts",
-  "Birth Info",
-  "Address_Location",
-  "Phone_Financial",
-  "Religion",
-  "Geotag_Schedule",
-  "IDs_Credentials",
-  "Demographics"
-];
-
-
 // PII DETECTION CONTENT SCRIPT
 // 1. Monitor user text selection (DOM and Inputs).
 // 2. Communicate with background.js for inference.
@@ -69,9 +54,8 @@ Position.icon = function (selection) {
     if (!selection || selection.rangeCount === 0) return;
 
     const range = selection.getRangeAt(0);
-    if (!range || range.collapsed) return; // ignore empty/collapsed selection
-
     const rects = range.getClientRects();
+
     if (!rects.length) return;
     const lastRect = rects[rects.length - 1];
     const icon = UI.createIcon();
@@ -176,13 +160,7 @@ Core.renderPopup = function (result) {
     let tokensHTML = "<em class='pii-no-tokens'>No sensitive tokens detected.</em>";
 
     if (result.head2 && result.head2.length > 0) {
-        // tokensHTML = result.head2.map(t => `<span class="pii-token-chip">${t.token}</span>`).join("");
-        
-        // Initial mapping of multi-class labels with the token
-        tokensHTML = result.head2.map(t => {
-            const labelName = LABEL_MAP[t.label] || "Other";  // fallback
-            return `<span class="pii-token-chip">${t.token} (${labelName})</span>`;
-        }).join("");
+        tokensHTML = result.head2.map(t => `<span class="pii-token-chip">${t.token}</span>`).join("");
     }
 
     popup.innerHTML = `
@@ -322,7 +300,6 @@ document.addEventListener("pointerup", (event) => {
         const text = Select.getText();
 
         if (text && text.length > 1) {
-            console.log("Highlighted text:", text); // print for debugging
 
             if (text !== lastSelectedText) {
                 piiIconConsumed = false;
