@@ -121,6 +121,15 @@ UI.createPopup = function () {
 // 6. CORE FUNCTIONALITY AND RENDERING
 // Highlighting logic: Wraps detected PII tokens in <span class="pii-inline">
 Core.highlight = function (selection, piiTokens) {
+
+    const activeEl = document.activeElement;
+
+    if (activeEl && (activeEl.isContentEditable ||
+        activeEl.tagName === "INPUT" ||
+        activeEl.tagName === "TEXTAREA")) {
+        return; // NEVER touch editable fields
+    }
+
     if (!piiTokens || piiTokens.length === 0 || !selection.rangeCount) return;
 
     const range = selection.getRangeAt(0);
@@ -302,7 +311,7 @@ icon.addEventListener("click", (e) => {
     const selection = window.getSelection();
 
     // Only restore + highlight for normal DOM
-    if (!context?.isInput && range) {
+    if (!context?.isInput && !context?.isEditable && range) {
         selection.removeAllRanges();
         selection.addRange(range);
 
