@@ -93,6 +93,13 @@ Position.popup = function (selection) {
     popup.style.left = `${window.scrollX + rect.left}px`;
 }
 
+Position.popupFromRect = function (rect) {
+    const popup = UI.createPopup();
+
+    popup.style.top = `${window.scrollY + rect.bottom + 8}px`;
+    popup.style.left = `${window.scrollX + rect.left}px`;
+};
+
 // 5. DOM ELEMENT CREATION (SINGLETONS)
 UI.createIcon = function () {
     if (piiIcon) return piiIcon;
@@ -131,7 +138,6 @@ Core.highlight = function (selection, piiTokens) {
             // Sort tokens by length (longest first) to prevent partial matching
             const sortedTokens = [...piiWords].sort((a, b) => b.length - a.length);
             
-            const wrapper = document.createElement('span');
             let tempHTML = text;
 
             sortedTokens.forEach(token => {
@@ -152,19 +158,19 @@ Core.highlight = function (selection, piiTokens) {
             }
         } else if (node.nodeType === Node.ELEMENT_NODE) {
             // Recursively check children if the selection spans multiple elements
-            for (let i = 0; i < node.childNodes.length; i++) {
-                const result = processNode(node.childNodes[i]);
+            [...node.childNodes].forEach(child => {
+                const result = processNode(child);
                 if (result) {
-                    node.replaceChild(result, node.childNodes[i]);
+                    child.replaceWith(result);
                 }
-            }
+            });
         }
         return null;
     };
 
     // 3. Process the fragment and put it back
-    processNode(fragment);
-    range.insertNode(fragment);
+    const processed = processNode(fragment) || fragment;
+    range.insertNode(processed);
     selection.removeAllRanges(); // Clear selection to stop recursive loops
 }
 
@@ -300,8 +306,13 @@ icon.addEventListener("click", (e) => {
         selection.removeAllRanges();
         selection.addRange(range);
 
+        const rect = range.getBoundingClientRect();
+
         Core.highlight(selection, result.head2);
-        Position.popup(selection);
+
+        // Use stored rect instead of selection
+        Position.popupFromRect(rect);
+
     } else {
         // For inputs: just show popup in center
         Position.center(UI.createPopup());
