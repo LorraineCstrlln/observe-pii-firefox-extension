@@ -208,8 +208,8 @@ Core.highlight = function (selection, piiTokens) {
     // 2. Helper function to process only text nodes
     const processNode = (node) => {
         if (node.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
-            console.log("Processing Fragment...");
-            Array.from(node.childNodes).forEach(child => {
+            console.log("Processing Document Fragment...");
+            [...node.childNodes].forEach(child => {
                 const result = processNode(child);
                 if (result) child.replaceWith(result);
             });
@@ -246,6 +246,9 @@ Core.highlight = function (selection, piiTokens) {
             }
         } else if (node.nodeType === Node.ELEMENT_NODE) {
             // Recursively check children if the selection spans multiple elements
+            if (node.classList && node.classList.contains("pii-inline")) {
+                return null;
+            }
             [...node.childNodes].forEach(child => {
                 const result = processNode(child);
                 if (result) {
@@ -268,6 +271,19 @@ Core.highlight = function (selection, piiTokens) {
     range.insertNode(processed);
     selection.removeAllRanges(); // Clear selection to stop recursive loops
 }
+
+Core.removeHighlight = function () {
+    const highlights = document.querySelectorAll('.pii-inline');
+    
+    highlights.forEach(span => {
+        const textNode = document.createTextNode(span.textContent);
+        span.parentNode.replaceChild(textNode, span);
+    });
+
+    // Pinagdidikit ang mga text nodes na naghiwalay dahil sa span
+    document.body.normalize();
+    console.log("PII: Highlights removed and DOM normalized.");
+};
 
 // Builds and displays the detailed PII info popup
 Core.renderPopup = function (result) {
@@ -412,7 +428,7 @@ icon.addEventListener("click", (e) => {
     if (!context?.isInput && !context?.isEditable && range) {
         selection.removeAllRanges();
         selection.addRange(range);
-        Core.highlight(selection, result.head2);
+        // Core.highlight(selection, result.head2); // remove highlighting for now
     }
 });
 
@@ -424,6 +440,7 @@ document.addEventListener("pointerdown", (e) => {
     }
     if (piiPopup && !piiPopup.contains(e.target)) {
         piiPopup.style.display = "none";
+        // Core.removeHighlight();
     }
 });
 
@@ -431,23 +448,30 @@ document.addEventListener("pointerdown", (e) => {
 document.addEventListener("pointerup", (event) => {
     if (event.button !== 0) return;
 
-    const activeEl = document.activeElement;
-    const isInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
-    const isEditable = activeEl && activeEl.isContentEditable;
+    let highlightTimeout;
 
-    setTimeout(() => {
+    // Debounce for last highlighting activity after 100ms
+    clearTimeout(highlightTimeout); // cancel previous pending call
+    highlightTimeout = setTimeout(() => {
         const text = Select.getText();
 
         if (text && text.length > 1) {
             console.log("Highlighted text:", text); // print for debugging
 
-            if (text !== lastSelectedText) {
-                piiIconConsumed = false;
-                lastSelectedText = text;
-            }
+            // if (text !== lastSelectedText) {
+            //     piiIconConsumed = false;
+            //     lastSelectedText = text;
+            // }
+            piiIconConsumed = false;
+            lastSelectedText = text;
+
+            const activeEl = document.activeElement;
+            const isInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+            const isEditable = activeEl && activeEl.isContentEditable;
+
             Core.sendText(text, { isInput, isEditable, activeEl });
-        } else {
-            if (piiIcon) piiIcon.style.display = "none";
+        } else if (piiIcon) {
+            piiIcon.style.display = "none";
         }
-    }, 100);
+    }, 100); // wait 100 ms after last pointerup
 });

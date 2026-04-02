@@ -124,12 +124,20 @@
 }
 
 /* INLINE HIGHLIGHT */
-.pii-inline {
+/* .pii-inline {
     background: rgba(201, 122, 138, 0.25);
     color: #f8eaea;
     font-weight: 600;
     border-radius: 4px;
     padding: 2px 5px;
+} */
+
+.pii-inline {
+    text-decoration: underline;
+    text-decoration-color: #e57373;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+    font-weight: 600;
 }
 
 /* NO TOKENS */
