@@ -60,11 +60,14 @@ Select.getText = function () {
 };
  
 // 4. POSITIONING LOGIC
+
+// Icon Center Show
 Position.center = function (element) {
     element.style.top = `${window.scrollY + window.innerHeight / 2}px`;
     element.style.left = `${window.scrollX + window.innerWidth / 2}px`;
 };
 
+// Icon Text Show (non-input fields)
 Position.icon = function (selection) {
     if (!selection || selection.rangeCount === 0) return;
 
@@ -80,6 +83,15 @@ Position.icon = function (selection) {
     icon.style.left = `${window.scrollX + lastRect.right}px`;
 };
 
+// Icon Text Show (input fields)
+Position.noElementPosition = function (element, insideIcon) {
+    const rect = element.getBoundingClientRect();
+
+    insideIcon.style.top = `${window.scrollY + rect.bottom + 5}px`;
+    insideIcon.style.left = `${window.scrollX + rect.left + 25}px`;
+}
+
+// Popup
 Position.popup = function (selection) {
     if (!selection || selection.rangeCount === 0) return;
 
@@ -93,11 +105,64 @@ Position.popup = function (selection) {
     popup.style.left = `${window.scrollX + rect.left}px`;
 }
 
-Position.popupFromRect = function (rect) {
+// Popup based on stored rect
+// Position.popupFromRect = function (rect) {
+//     const popup = UI.createPopup();
+
+//     popup.style.top = `${window.scrollY + rect.bottom + 8}px`;
+//     popup.style.left = `${window.scrollX + rect.left}px`;
+// };
+
+// Popup based on icon (dynamic positioning)
+Position.popupFromIcon = function () {
+    const icon = UI.createIcon();
     const popup = UI.createPopup();
 
-    popup.style.top = `${window.scrollY + rect.bottom + 8}px`;
-    popup.style.left = `${window.scrollX + rect.left}px`;
+    // Ensure content is rendered first
+    popup.style.display = "block";
+    popup.style.opacity = "0";       // invisible for measurement
+    popup.style.transform = "scale(1)";
+
+    // Get the rendered size of the popup
+    const popupHeight = popup.offsetHeight;
+    const popupWidth = popup.offsetWidth;
+
+    // Get icon position and viewport size
+    const iconRect = icon.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // Compute available space around icon
+    const spaceBelow = viewportHeight - iconRect.bottom - 8; // margin
+    const spaceAbove = iconRect.top - 8;
+
+    // Vertical Position
+    let top;
+
+    if (spaceBelow >= popupHeight) {
+        top = window.scrollY + iconRect.top + 8;
+    } 
+    else if (spaceAbove >= popupHeight) {
+        top = window.scrollY + iconRect.top - (popupHeight + iconRect.height/2)- 8;
+    } 
+    else {
+        // Clamp and allow scrolling
+        top = window.scrollY + iconRect.bottom + 8;
+        popup.style.maxHeight = `${Math.max(spaceBelow, spaceAbove)}px`;
+        popup.style.overflowY = "auto";
+    }
+
+    // Horizontal Position
+    let left = window.scrollX + iconRect.left;
+    if (left + popupWidth > viewportWidth - 10) {
+        left = window.scrollX + viewportWidth - popupWidth - 10;
+    }
+    if (left < 10) left = window.scrollX + 10;
+
+    // Apply final position
+    popup.style.top = `${top}px`;
+    popup.style.left = `${left}px`;
+    popup.style.opacity = "1"; // restore visibility
 };
 
 // 5. DOM ELEMENT CREATION (SINGLETONS)
@@ -135,17 +200,30 @@ Core.highlight = function (selection, piiTokens) {
     const range = selection.getRangeAt(0);
     const piiWords = piiTokens.map(t => t.token.toLowerCase());
 
+    console.log("PII Tokens received:", piiWords);
     // 1. Create a document fragment from the selection
     const fragment = range.extractContents();
 
+
     // 2. Helper function to process only text nodes
     const processNode = (node) => {
+        if (node.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+            console.log("Processing Fragment...");
+            Array.from(node.childNodes).forEach(child => {
+                const result = processNode(child);
+                if (result) child.replaceWith(result);
+            });
+            return node; 
+        }
+
         if (node.nodeType === Node.TEXT_NODE) {
             let text = node.textContent;
             let hasMatch = false;
             
             // Sort tokens by length (longest first) to prevent partial matching
             const sortedTokens = [...piiWords].sort((a, b) => b.length - a.length);
+
+            console.log("SORTED TOKENS", sortedTokens);
             
             let tempHTML = text;
 
@@ -163,6 +241,7 @@ Core.highlight = function (selection, piiTokens) {
             if (hasMatch) {
                 const newSpan = document.createElement('span');
                 newSpan.innerHTML = tempHTML;
+                console.log("Match found! New HTML:", tempHTML);
                 return newSpan;
             }
         } else if (node.nodeType === Node.ELEMENT_NODE) {
@@ -177,8 +256,15 @@ Core.highlight = function (selection, piiTokens) {
         return null;
     };
 
+
     // 3. Process the fragment and put it back
     const processed = processNode(fragment) || fragment;
+
+    const debugContainer = document.createElement("div");
+    debugContainer.appendChild(processed.cloneNode(true));
+    
+    console.log("FINAL HTML RESULT:", debugContainer.innerHTML);
+
     range.insertNode(processed);
     selection.removeAllRanges(); // Clear selection to stop recursive loops
 }
@@ -259,6 +345,7 @@ Core.sendText = function (text, context = {}) {
         if (!response || !response.text) return;
 
         const selection = window.getSelection();
+        const activeEl = context?.activeEl;
 
         if (!context?.isInput) {
             if (!selection || selection.rangeCount === 0) return;
@@ -270,10 +357,19 @@ Core.sendText = function (text, context = {}) {
         window.piiLastResult = response.text;
         window.piiLastContext = context;
 
+        const insideIcon = UI.createIcon();
+
         if (!context?.isInput && selection && selection.rangeCount > 0) {
+            // DOM or contenteditable with valid selection
             Position.icon(selection);
+
+        } else if (activeEl) {
+            // Fallback for inputs OR broken contenteditable (Gmail headers)
+            Position.noElementPosition(activeEl, insideIcon);
+
         } else {
-            Position.center(UI.createIcon());
+            // Last fallback (should rarely happen)
+            Position.center(insideIcon);
         }
 
         const icon = UI.createIcon();
@@ -298,36 +394,26 @@ icon.addEventListener("click", (e) => {
 
     piiIconConsumed = true;
 
-    if (piiIcon) {
-        piiIcon.style.display = "none";
-    }
-
     const range = window.piiLastRange;
     const result = window.piiLastResult;
     const context = window.piiLastContext;
 
     if (!result) return;
 
-    const selection = window.getSelection();
+    Core.renderPopup(result);
+    Position.popupFromIcon();
+
+    if (piiIcon) {
+        piiIcon.style.display = "none";
+    }
 
     // Only restore + highlight for normal DOM
+    const selection = window.getSelection();
     if (!context?.isInput && !context?.isEditable && range) {
         selection.removeAllRanges();
         selection.addRange(range);
-
-        const rect = range.getBoundingClientRect();
-
         Core.highlight(selection, result.head2);
-
-        // Use stored rect instead of selection
-        Position.popupFromRect(rect);
-
-    } else {
-        // For inputs: just show popup in center
-        Position.center(UI.createPopup());
     }
-
-    Core.renderPopup(result);
 });
 
 // DISMISSAL: Hides UI when clicking elsewhere
@@ -359,7 +445,7 @@ document.addEventListener("pointerup", (event) => {
                 piiIconConsumed = false;
                 lastSelectedText = text;
             }
-            Core.sendText(text, { isInput, isEditable });
+            Core.sendText(text, { isInput, isEditable, activeEl });
         } else {
             if (piiIcon) piiIcon.style.display = "none";
         }
