@@ -21,7 +21,8 @@
     "web_accessible_resources": [{
         "resources": [
             "model/*",
-            "lib/*"
+            "lib/*",
+            "observepii_logo1.png"
         ],
         "matches": ["<all_urls>"]
     }],

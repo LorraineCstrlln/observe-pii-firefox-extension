@@ -159,25 +159,79 @@
     
     /* Using your theme variables */
     background: var(--bg-popup);
-    border: 1px solid var(--accent-border);
-    color: var(--danger-main); /* Default to warning color */
+    border: 1.5px solid var(--accent-border); /* Slightly thicker border */
     
-    /* Styling */
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    display: none; 
+    /* Box Sizing & Centering */
+    width: 34px;
+    height: 34px;
+    border-radius: 10px; /* Matching the popup's rounded feel */
+    display: flex; /* Changed from none to help you see it during testing */
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    overflow: hidden; /* Keeps the image inside the rounded corners */
+    padding: 4px; /* Internal spacing so the logo doesn't touch the border */
     
     /* Effects */
     box-shadow: var(--shadow-soft), var(--shadow-inner);
-    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                border-color 0.2s ease, 
+                box-shadow 0.2s ease;
+}
+
+/* Ensure the logo inside scales properly */
+#pii-icon-floating img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
 }
 
 #pii-icon-floating:hover {
-    transform: scale(1.15);
+    transform: scale(1.1);
+    border-color: var(--safe-main); /* Glows teal/safe on hover */
+    box-shadow: 0 0 15px rgba(127, 182, 176, 0.3);
+}
+
+/* CATEGORIES SECTION */
+.pii-categories-section {
+    margin-top: 6px;
+    margin-bottom: 9px;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+/* Categories container */
+.pii-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 1px;
+}
+
+/* Individual category chips */
+.pii-categories span {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-main);
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transition: all 0.15s ease;
+}
+
+/* Hover effect for polish */
+.pii-categories span:hover {
     border-color: var(--accent-soft);
-    box-shadow: 0 0 12px rgba(107, 99, 163, 0.4);
+    background: rgba(107, 99, 163, 0.18);
+    transform: translateY(-1px);
+}
+
+/* Empty state */
+.pii-categories:empty::before {
+    content: "None";
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
 }

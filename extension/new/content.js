@@ -1,15 +1,15 @@
 // Multi-class Mapping
 const LABEL_MAP = [
-  "Other",
-  "Name_Relationship",
-  "Email_Accounts",
-  "Birth Info",
-  "Address_Location",
-  "Phone_Financial",
-  "Religion",
-  "Geotag_Schedule",
-  "IDs_Credentials",
-  "Demographics"
+  "Other / Unclassified",
+  "Names & Relationships",
+  "Emails & Online Accounts",
+  "Birth Information",
+  "Address & Location",
+  "Phone & Financial Info",
+  "Religious Information",
+  "Location & Activity (Geotag/Schedule)",
+  "IDs & Login Credentials",
+  "Personal Demographics"
 ];
 
 
@@ -166,14 +166,42 @@ Position.popupFromIcon = function () {
 };
 
 // 5. DOM ELEMENT CREATION (SINGLETONS)
+// UI.createIcon = function () {
+//     if (piiIcon) return piiIcon;
+//     piiIcon = document.createElement("div");
+//     piiIcon.id = "pii-icon-floating";
+//     piiIcon.innerHTML = "⚠️";
+//     document.body.appendChild(piiIcon);
+//     return piiIcon;
+// }
+
+// 5. DOM ELEMENT CREATION (SINGLETONS)
 UI.createIcon = function () {
     if (piiIcon) return piiIcon;
+
     piiIcon = document.createElement("div");
     piiIcon.id = "pii-icon-floating";
-    piiIcon.innerHTML = "⚠️";
+
+    piiIcon.style.display = "none";
+
+    // Create the image element
+    const logo = document.createElement("img");
+    
+    // Use browser.runtime.getURL to get the extension's internal path
+    logo.src = browser.runtime.getURL("observepii_logo1.png");
+    
+    // Basic styling to make sure it fits your div
+    logo.style.width = "100%";
+    logo.style.height = "100%";
+    logo.style.display = "block";
+    logo.alt = "PII Warning";
+
+    piiIcon.appendChild(logo);
     document.body.appendChild(piiIcon);
+    
     return piiIcon;
 }
+
 
 UI.createPopup = function () {
     if (piiPopup) return piiPopup;
@@ -305,7 +333,7 @@ Core.renderPopup = function (result) {
         const categories = [...new Set(
             result.head2.map(t => LABEL_MAP[t.label] || "Other")
         )];
-        newcat = categories.join(", ");
+        newcat = categories.map(cat => `<span>${cat}</span>`).join("");
 
     }
 
@@ -328,9 +356,9 @@ Core.renderPopup = function (result) {
                 <span class="pii-status ${isPII ? "danger" : "safe"}">${isPII ? "Yes" : "No"}</span>
             </div>
 
-            <div class="pii-tokens-section">
+            <div class="pii-categories-section">
                 <strong>Categories:</strong>
-                <div class="pii-tokens-container">${newcat || "None"}</div>
+                <div class="pii-categories">${newcat || "None"}</div>
             </div>
         </div>
     `;
