@@ -473,10 +473,17 @@ document.addEventListener("pointerdown", (e) => {
 });
 
 // SELECTION TRIGGER: Detects when the user finishes selecting text
+let highlightTimeout;
+
 document.addEventListener("pointerup", (event) => {
     if (event.button !== 0) return;
 
-    let highlightTimeout;
+    if (
+        (piiIcon && piiIcon.contains(event.target)) ||
+        (piiPopup && piiPopup.contains(event.target))
+    ) {
+        return;
+    }
 
     // Debounce for last highlighting activity after 100ms
     clearTimeout(highlightTimeout); // cancel previous pending call
