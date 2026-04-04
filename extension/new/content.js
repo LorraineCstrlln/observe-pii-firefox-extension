@@ -12,7 +12,6 @@ const LABEL_MAP = [
   "Personal Demographics"
 ];
 
-
 // PII DETECTION CONTENT SCRIPT
 // 1. Monitor user text selection (DOM and Inputs).
 // 2. Communicate with background.js for inference.
@@ -33,11 +32,6 @@ const UI = {};
 const Position = {};
 const Select = {};
 const Core = {};
-
-// const UI = { createIcon, createPopup };
-// const Position = { center, icon, popup };
-// const Select = { getText };
-// const Core = { highlight, renderPopup, sendText };
 
 // 2. GLOBAL STATE
 let piiIcon = null;
@@ -60,7 +54,6 @@ Select.getText = function () {
 };
  
 // 4. POSITIONING LOGIC
-
 // Icon Center Show
 Position.center = function (element) {
     element.style.top = `${window.scrollY + window.innerHeight / 2}px`;
@@ -104,14 +97,6 @@ Position.popup = function (selection) {
     popup.style.top = `${window.scrollY + rect.bottom + 8}px`;
     popup.style.left = `${window.scrollX + rect.left}px`;
 }
-
-// Popup based on stored rect
-// Position.popupFromRect = function (rect) {
-//     const popup = UI.createPopup();
-
-//     popup.style.top = `${window.scrollY + rect.bottom + 8}px`;
-//     popup.style.left = `${window.scrollX + rect.left}px`;
-// };
 
 // Popup based on icon (dynamic positioning)
 Position.popupFromIcon = function () {
@@ -164,16 +149,6 @@ Position.popupFromIcon = function () {
     popup.style.left = `${left}px`;
     popup.style.opacity = "1"; // restore visibility
 };
-
-// 5. DOM ELEMENT CREATION (SINGLETONS)
-// UI.createIcon = function () {
-//     if (piiIcon) return piiIcon;
-//     piiIcon = document.createElement("div");
-//     piiIcon.id = "pii-icon-floating";
-//     piiIcon.innerHTML = "⚠️";
-//     document.body.appendChild(piiIcon);
-//     return piiIcon;
-// }
 
 // 5. DOM ELEMENT CREATION (SINGLETONS)
 UI.createIcon = function () {
@@ -492,11 +467,6 @@ document.addEventListener("pointerup", (event) => {
 
         if (text && text.length > 1) {
             console.log("Highlighted text:", text); // print for debugging
-
-            // if (text !== lastSelectedText) {
-            //     piiIconConsumed = false;
-            //     lastSelectedText = text;
-            // }
             piiIconConsumed = false;
             lastSelectedText = text;
 

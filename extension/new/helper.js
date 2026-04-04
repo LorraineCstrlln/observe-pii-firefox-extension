@@ -94,7 +94,6 @@ export function mergeSubwords(tokens, offsets, threshold) {
             if(buffer) {
                 buffer.token += t.token.slice(2); // remove '##'
                 // buffer.probs = Math.max(buffer.probs, t.probs[1]); // binary logic
-
                 if (maxPII > buffer.probs) {
                     buffer.probs = maxPII;
                     buffer.label = t.label;

@@ -1,30 +1,19 @@
 :root {
-    /* Base Panels */
     --bg-popup: linear-gradient(145deg, #1f1b2e, #2a2540);
     --bg-panel-soft: rgba(255, 255, 255, 0.04);
-
-    /* Status Colors */
     --danger-main: #c97a8a;
     --danger-bg: #3a1f28;
-
     --safe-main: #7fb6b0;
     --safe-bg: #1f3433;
-
-    /* Accents */
     --accent-border: #4a4370;
     --accent-soft: #6b63a3;
-
-    /* Text */
     --text-main: #f0edf7;
     --text-strong: #ffffff;
     --text-muted: #b6b0d4;
-
-    /* Shadows */
     --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.35);
     --shadow-inner: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
-/* POPUP CONTAINER */
 #pii-popup {
     position: absolute;
     z-index: 999999;
@@ -44,7 +33,6 @@
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-/* Inner frame */
 .pii-pixel-frame {
     background: var(--bg-panel-soft);
     border-radius: 10px;
@@ -52,7 +40,6 @@
     box-shadow: var(--shadow-inner);
 }
 
-/* HEADER */
 .pii-header {
     display: flex;
     align-items: center;
@@ -73,7 +60,6 @@
     color: var(--text-muted);
 }
 
-/* ICON */
 .pii-icon {
     width: 36px;
     height: 36px;
@@ -95,7 +81,6 @@
     color: var(--safe-main);
 }
 
-/* PII STATUS */
 .pii-status {
     font-size: 15px;
     font-weight: 700;
@@ -110,7 +95,6 @@
     color: var(--safe-main);
 }
 
-/* TOKEN CHIPS */
 .pii-token-chip {
     background: rgba(255, 255, 255, 0.08);
     color: var(--text-main);
@@ -123,15 +107,6 @@
     border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-/* INLINE HIGHLIGHT */
-/* .pii-inline {
-    background: rgba(201, 122, 138, 0.25);
-    color: #f8eaea;
-    font-weight: 600;
-    border-radius: 4px;
-    padding: 2px 5px;
-} */
-
 .pii-inline {
     text-decoration: underline;
     text-decoration-color: #e57373;
@@ -140,7 +115,6 @@
     font-weight: 600;
 }
 
-/* NO TOKENS */
 .pii-no-tokens {
     font-style: italic;
     color: var(--text-muted);
@@ -156,29 +130,22 @@
     position: absolute;
     z-index: 2147483647;
     cursor: pointer;
-    
-    /* Using your theme variables */
     background: var(--bg-popup);
-    border: 1.5px solid var(--accent-border); /* Slightly thicker border */
-    
-    /* Box Sizing & Centering */
+    border: 1.5px solid var(--accent-border);
     width: 34px;
     height: 34px;
-    border-radius: 10px; /* Matching the popup's rounded feel */
-    display: flex; /* Changed from none to help you see it during testing */
+    border-radius: 10px;
+    display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden; /* Keeps the image inside the rounded corners */
-    padding: 4px; /* Internal spacing so the logo doesn't touch the border */
-    
-    /* Effects */
+    overflow: hidden;
+    padding: 4px;
     box-shadow: var(--shadow-soft), var(--shadow-inner);
     transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
                 border-color 0.2s ease, 
                 box-shadow 0.2s ease;
 }
 
-/* Ensure the logo inside scales properly */
 #pii-icon-floating img {
     width: 100%;
     height: 100%;
@@ -188,11 +155,10 @@
 
 #pii-icon-floating:hover {
     transform: scale(1.1);
-    border-color: var(--safe-main); /* Glows teal/safe on hover */
+    border-color: var(--safe-main);
     box-shadow: 0 0 15px rgba(127, 182, 176, 0.3);
 }
 
-/* CATEGORIES SECTION */
 .pii-categories-section {
     margin-top: 6px;
     margin-bottom: 9px;
@@ -201,7 +167,6 @@
     gap: 6px;
 }
 
-/* Categories container */
 .pii-categories {
     display: flex;
     flex-wrap: wrap;
@@ -209,7 +174,6 @@
     margin-top: 1px;
 }
 
-/* Individual category chips */
 .pii-categories span {
     background: rgba(255, 255, 255, 0.08);
     color: var(--text-main);
@@ -221,14 +185,12 @@
     transition: all 0.15s ease;
 }
 
-/* Hover effect for polish */
 .pii-categories span:hover {
     border-color: var(--accent-soft);
     background: rgba(107, 99, 163, 0.18);
     transform: translateY(-1px);
 }
 
-/* Empty state */
 .pii-categories:empty::before {
     content: "None";
     font-size: 12px;
