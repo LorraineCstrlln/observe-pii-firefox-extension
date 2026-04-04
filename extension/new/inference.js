@@ -62,3 +62,5 @@ export async function runInference(session, tokenizer, text) {
         console.error("Inference Error:", err);
     }
 }
+
+globalThis.runInference = runInference;

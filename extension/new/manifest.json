@@ -10,7 +10,10 @@
     },
 
     "background": {
-        "page": "background.html"
+        "scripts": [
+            "lib/ort.min.js",
+            "background.js"
+        ]
     },
 
     "content_scripts": [
@@ -41,7 +44,7 @@
             "id": "wslabproj_observe-pii@up.edu.ph",
             "strict_min_version": "109.0",
             "data_collection_permissions": {
-                "required": [],
+                "required": ["websiteContent"],
                 "optional": []
             }
         }

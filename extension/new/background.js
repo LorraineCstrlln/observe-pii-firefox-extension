@@ -4,18 +4,35 @@
 // 3. Listen for text analysis requests from content scripts.
 
 // 1. IMPORTS
-import { runInference } from './inference.js';
-import { env, AutoTokenizer } from './lib/transformers.min.js';
+// import { runInference } from './inference.js';
+// import { env, AutoTokenizer } from './lib/transformers.min.js';
+// import * as ort from './lib/ort.min.js';
 
 // 2. GLOBAL STATE
 let session = null;
 let tokenizer = null;
+let transformers = null;
+let runInferenceFn = null;
+
+async function loadTransformers() {
+    if (!transformers) {
+        transformers = await import(browser.runtime.getURL('lib/transformers.min.js'));
+    }
+    return transformers;
+}
+
+async function loadInference() {
+    if (!runInferenceFn) {
+        const mod = await import(browser.runtime.getURL('inference.js'));
+        runInferenceFn = mod.runInference;
+    }
+}
 
 // 3. ENGINE CONFIGURATION (ORT)
 // Sets up the ONNX Runtime (ORT) environment (Maps the necessary WASM files to their local extension paths)
 function initOrt() {
     console.log("Initializing ORT...");
-    const ort = globalThis.ort;
+    // const ort = globalThis.ort;
 
     // Explicitly point to local WASM files for performance and security
     ort.env.wasm.wasmPaths = {
@@ -52,6 +69,10 @@ async function initSession() {
 
 // Prepares the Tokenizer (converts human words into numbers the AI can understand)
 async function initTokenizer() {
+    transformers = await loadTransformers();
+
+    const { env, AutoTokenizer } = transformers;
+
     env.localModelPath = browser.runtime.getURL("").replace(/\/$/, "");
     env.useBrowserCache = false;    // disable default caching
     env.allowRemoteModels = false;  // disable remote models
@@ -68,11 +89,18 @@ async function initTokenizer() {
     console.log("Tokenizer Initialized!");
 }
 
+// Track if background.js is terminated or restarted automatiically
+let initialized = false;
+
 // 4. INITIALIZATION
 async function init() {
+    if (initialized) return;    // prevents multiple initis
+    initialized = true;         // mark as done
+    
     try {
         initOrt();
         await initSession();
+        await loadInference();
         await initTokenizer();
         console.log("PII Extension is ready!");
     } catch (error) {
@@ -95,7 +123,7 @@ browser.runtime.onMessage.addListener(async (msg, _) => {
 
         try {
             // runInference is imported from inference.js
-            const results = await runInference(session, tokenizer, msg.text);
+            const results = await runInferenceFn(session, tokenizer, msg.text);
             return { status: "success", text: results };
         } catch (err) {
             console.error("Inference Error:", err);

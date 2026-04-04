@@ -243,8 +243,21 @@ Core.highlight = function (selection, piiTokens) {
 
             if (hasMatch) {
                 const newSpan = document.createElement('span');
-                newSpan.innerHTML = tempHTML;
-                console.log("Match found! New HTML:", tempHTML);
+                // newSpan.innerHTML = tempHTML;
+
+                const parts = tempHTML.split(/(<span class="pii-inline">.*?<\/span>)/g);
+                parts.forEach(part => {
+                    if (part.startsWith('<span')) {
+                        const el = document.createElement('span');
+                        el.className = 'pii-inline';
+                        el.textContent = part.replace(/<\/?span[^>]*>/g, '');
+                        newSpan.appendChild(el);
+                    } else {
+                        newSpan.appendChild(document.createTextNode(part));
+                    }
+                });
+
+                
                 return newSpan;
             }
         } else if (node.nodeType === Node.ELEMENT_NODE) {
@@ -265,12 +278,6 @@ Core.highlight = function (selection, piiTokens) {
 
     // 3. Process the fragment and put it back
     const processed = processNode(fragment) || fragment;
-
-    const debugContainer = document.createElement("div");
-    debugContainer.appendChild(processed.cloneNode(true));
-    
-    console.log("FINAL HTML RESULT:", debugContainer.innerHTML);
-
     range.insertNode(processed);
     selection.removeAllRanges(); // Clear selection to stop recursive loops
 }
@@ -294,7 +301,7 @@ Core.renderPopup = function (result) {
     const isPII = result.head1;
 
     let tokensHTML = "<em class='pii-no-tokens'>No sensitive tokens detected.</em>";
-    let newcat;
+    let categories;
 
     if (result.head2 && result.head2.length > 0) {
         // tokensHTML = result.head2.map(t => `<span class="pii-token-chip">${t.token}</span>`).join("");
@@ -305,38 +312,44 @@ Core.renderPopup = function (result) {
             return `<span class="pii-token-chip">${t.token} (${labelName})</span>`;
         }).join("");
 
-        const categories = [...new Set(
+        categories = [...new Set(
             result.head2.map(t => LABEL_MAP[t.label] || "Other")
         )];
-        newcat = categories.map(cat => `<span>${cat}</span>`).join("");
+        // newcat = categories.map(cat => `<span>${cat}</span>`).join("");
 
     }
 
-    popup.innerHTML = `
-        <div class="pii-pixel-frame">
-            <div class="pii-header">
-                <div class="pii-icon ${isPII ? "danger" : "safe"}">
-                    ${isPII ? "⚠️" : "✅"}
-                </div>
-                <div>
-                    <div class="pii-header-title">PII Detection</div>
-                    <div class="pii-header-sub">
-                        ${isPII ? "Oops! Sensitive info detected!" : "Text appears safe"}
-                    </div>
-                </div>
-            </div>
+    popup.innerHTML = "";
 
-            <div class="pii-status-row">
-                <strong>Contains PII:</strong>
-                <span class="pii-status ${isPII ? "danger" : "safe"}">${isPII ? "Yes" : "No"}</span>
-            </div>
+    const popupFrame = Core.popupInnerHTML(isPII, categories);
+    popup.appendChild(popupFrame);
+    
 
-            <div class="pii-categories-section">
-                <strong>Categories:</strong>
-                <div class="pii-categories">${newcat || "None"}</div>
-            </div>
-        </div>
-    `;
+    // popup.innerHTML = `
+    //     <div class="pii-pixel-frame">
+    //         <div class="pii-header">
+    //             <div class="pii-icon ${isPII ? "danger" : "safe"}">
+    //                 ${isPII ? "⚠️" : "✅"}
+    //             </div>
+    //             <div>
+    //                 <div class="pii-header-title">PII Detection</div>
+    //                 <div class="pii-header-sub">
+    //                     ${isPII ? "Oops! Sensitive info detected!" : "Text appears safe"}
+    //                 </div>
+    //             </div>
+    //         </div>
+
+    //         <div class="pii-status-row">
+    //             <strong>Contains PII:</strong>
+    //             <span class="pii-status ${isPII ? "danger" : "safe"}">${isPII ? "Yes" : "No"}</span>
+    //         </div>
+
+    //         <div class="pii-categories-section">
+    //             <strong>Categories:</strong>
+    //             <div class="pii-categories">${newcat || "None"}</div>
+    //         </div>
+    //     </div>
+    // `;
             // <div class="pii-tokens-section">
             //     <strong>PII Tokens:</strong>
             //     <div class="pii-tokens-container">${tokensHTML}</div>
@@ -347,6 +360,84 @@ Core.renderPopup = function (result) {
         popup.style.opacity = "1";
         popup.style.transform = "scale(1)";
     });
+}
+
+Core.popupInnerHTML = function (isPII, newcat) {
+
+    // Frame
+    const popupFrame = document.createElement("div");
+    popupFrame.className = "pii-pixel-frame";
+
+    // Header
+    const header = document.createElement("div");
+    header.className = "pii-header";
+
+    // Icon
+    const icon = document.createElement("div");
+    icon.className = "pii-icon" + (isPII ? "danger" : "safe");
+    icon.textContent = isPII ? "⚠️" : "✅";
+
+    const headerText = document.createElement("div");
+
+    const title = document.createElement("div");
+    title.className = "pii-header-title";
+    title.textContent = "PII Detection";
+
+    const sub = document.createElement("div");
+    sub.className = "pii-header-sub";
+    sub.textContent = isPII
+        ? "Oops! Sensitive info detected!"
+        : "Text appears safe";
+
+    headerText.appendChild(title);
+    headerText.appendChild(sub);
+
+    header.appendChild(icon);
+    header.appendChild(headerText);
+
+    // Status row
+    const statusRow = document.createElement("div");
+    statusRow.className = "pii-status-row";
+
+    const strong = document.createElement("strong");
+    strong.textContent = "Contains PII:";
+
+    const status = document.createElement("span");
+    status.className = "pii-status " + (isPII ? "danger" : "safe");
+    status.textContent = isPII ? "Yes" : "No";
+
+    statusRow.appendChild(strong);
+    statusRow.appendChild(status);
+
+    // Categories
+    const catSection = document.createElement("div");
+    catSection.className = "pii-categories-section";
+
+    const catLabel = document.createElement("strong");
+    catLabel.textContent = "Categories:";
+
+    const catContainer = document.createElement("div");
+    catContainer.className = "pii-categories";
+
+    if (newcat && newcat.length > 0) {
+        newcat.forEach(cat => {
+            const span = document.createElement("span");
+            span.textContent = cat;
+            catContainer.appendChild(span);
+        });
+    } else {
+        catContainer.textContent = "None";
+    }
+
+    catSection.appendChild(catLabel); 
+    catSection.appendChild(catContainer); 
+    
+    // Assemble 
+    popupFrame.appendChild(header); 
+    popupFrame.appendChild(statusRow); 
+    popupFrame.appendChild(catSection);
+
+    return popupFrame;
 }
 
 // Sends text to background.js for AI analysis
