@@ -1,7 +1,13 @@
 {
     "manifest_version": 3,
-    "name": "DualHead PII Checker",
+    "name": "OBSERVE-PII",
     "version": "1.0",
+    "description": "OBSERVE-PII detects contextual Personally Identifiable Information (PII) in real time as users interact with text fields and web content, helping them become more aware of potential sensitive data exposure. It identifies multiple PII categories, including names and relationships, emails and online accounts, phone and financial information, addresses and locations, birth information, religious details, geotagged or scheduled activities, IDs and login credentials, personal demographics, and other unclassified data, directly within input fields and visible text to promote safer online behavior. The extension leverages an ONNX-based AI model for local processing: it initializes the ONNX Runtime (ORT) environment, loads the trained .onnx model into memory, configures a tokenizer to convert human-readable text into numeric tokens, and establishes a session that listens for text analysis requests from content scripts, enabling fast, secure, and fully client-side PII detection.",
+
+    "icons": {
+        "48": "observepii_logo1.png",
+        "96": "observepii_logo1.png"
+    },
 
     "background": {
         "page": "background.html"
@@ -28,5 +34,16 @@
     }],
     "content_security_policy": {
         "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+    }, 
+
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "wslabproj_observe-pii@up.edu.ph",
+            "strict_min_version": "109.0",
+            "data_collection_permissions": {
+                "required": [],
+                "optional": []
+            }
+        }
     }
 }
