@@ -163,7 +163,7 @@ UI.createIcon = function () {
     const logo = document.createElement("img");
     
     // Use browser.runtime.getURL to get the extension's internal path
-    logo.src = browser.runtime.getURL("observepii_logo1.png");
+    logo.src = browser.runtime.getURL("observepii_logo1_512.png");
     
     // Basic styling to make sure it fits your div
     logo.style.width = "100%";

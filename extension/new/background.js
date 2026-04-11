@@ -115,8 +115,8 @@ init();
 browser.runtime.onMessage.addListener(async (msg, _) => {
     if (msg.type === "runInference") {
         // Guard: Prevent errors if the model hasn't finished loading
-        if (!session || !tokenizer) {
-            return { error: "AI Engine is still warming up. Please wait." }; 
+        if (!session || !tokenizer || !runInferenceFn) {
+            await init();
         }
 
         console.log("Processing PII check for selected text...");
