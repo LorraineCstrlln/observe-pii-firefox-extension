@@ -5,9 +5,9 @@
     "description": "OBSERVE-PII detects contextual Personally Identifiable Information (PII) in real time as users interact with text fields and web content, helping them become more aware of potential sensitive data exposure. It identifies multiple PII categories, including names and relationships, emails and online accounts, phone and financial information, addresses and locations, birth information, religious details, geotagged or scheduled activities, IDs and login credentials, personal demographics, and other unclassified data, directly within input fields and visible text to promote safer online behavior. The extension leverages an ONNX-based AI model for local processing: it initializes the ONNX Runtime (ORT) environment, loads the trained .onnx model into memory, configures a tokenizer to convert human-readable text into numeric tokens, and establishes a session that listens for text analysis requests from content scripts, enabling fast, secure, and fully client-side PII detection.",
 
     "icons": {
-        "48": "observepii_logo1_48.png",
-        "96": "observepii_logo1_96.png",
-        "512": "observepii_logo1_512.png"
+        "48": "icons/observepii_logo1_48.png",
+        "96": "icons/observepii_logo1_96.png",
+        "512": "icons/observepii_logo1_512.png"
     },
 
     "background": {
@@ -32,9 +32,9 @@
         "resources": [
             "model/*",
             "lib/*",
-            "observepii_logo1_48.png",
-            "observepii_logo1_96.png",
-            "observepii_logo1_512.png"
+            "icons/observepii_logo1_48.png",
+            "icons/observepii_logo1_96.png",
+            "icons/observepii_logo1_512.png"
         ],
         "matches": ["<all_urls>"]
     }],
