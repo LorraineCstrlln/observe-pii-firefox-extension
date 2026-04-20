@@ -15,7 +15,7 @@ export async function runInference(session, tokenizer, text) {
             const logits1 = Array.from(results.logits_head1.data);
             const probsHead1 = softMax([logits1[0], logits1[1]]);
             
-            if (probsHead1[1] > 0.6) isTextContextual = true;
+            if (probsHead1[1] > 0.5) isTextContextual = true;
 
             console.log(probsHead1[1])
 

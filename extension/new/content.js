@@ -2,14 +2,14 @@
 const LABEL_MAP = [
   "Other / Unclassified",
   "Names & Relationships",
-  "Emails & Online Accounts",
-  "Birth Information",
-  "Address & Location",
-  "Phone & Financial Info",
-  "Religious Information",
-  "Location & Activity (Geotag/Schedule)",
-  "IDs & Login Credentials",
-  "Personal Demographics"
+  "Digital Identity / Online Accounts",
+  "Birth / Age Identifiers",
+  "Location & Affiliation, ",
+  "Contact / Financial Numbers",
+  "Sensitive Beliefs / Associations",
+  "Spatiotemporal / Traceability",
+  "Official / Institutional Identifiers",
+  "Demographics / Group Identity"
 ];
 
 // PII DETECTION CONTENT SCRIPT
@@ -543,7 +543,6 @@ document.addEventListener("pointerdown", (e) => {
 
 // SELECTION TRIGGER: Detects when the user finishes selecting text
 let highlightTimeout;
-
 document.addEventListener("pointerup", (event) => {
     if (event.button !== 0) return;
 
