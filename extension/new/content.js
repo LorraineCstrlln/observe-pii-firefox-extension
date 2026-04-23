@@ -4,7 +4,7 @@ const LABEL_MAP = [
   "Names & Relationships",
   "Digital Identity / Online Accounts",
   "Birth / Age Identifiers",
-  "Location & Affiliation, ",
+  "Location & Affiliation",
   "Contact / Financial Numbers",
   "Sensitive Beliefs / Associations",
   "Spatiotemporal / Traceability",
@@ -312,8 +312,9 @@ Core.renderPopup = function (result) {
         // Initial mapping of multi-class labels with the token
         tokensHTML = result.head2.map(t => {
             const labelName = LABEL_MAP[t.label] || "Other";  // fallback
-            return `<span class="pii-token-chip">${t.token} (${labelName})</span>`;
-        }).join("");
+            // return `<span class="pii-token-chip">${t.token} (${labelName})</span>`;
+            return `${t.token}|||${labelName}`;
+        }).join(";;;");
 
         categories = [...new Set(
             result.head2.map(t => LABEL_MAP[t.label] || "Other")
@@ -324,7 +325,7 @@ Core.renderPopup = function (result) {
 
     popup.innerHTML = "";
 
-    const popupFrame = Core.popupInnerHTML(isPII, categories);
+    const popupFrame = Core.popupInnerHTML(isPII, categories, tokensHTML);
     popup.appendChild(popupFrame);
     
 
@@ -365,7 +366,7 @@ Core.renderPopup = function (result) {
     });
 }
 
-Core.popupInnerHTML = function (isPII, newcat) {
+Core.popupInnerHTML = function (isPII, categories, tokensHTML) {
 
     // Frame
     const popupFrame = document.createElement("div");
@@ -422,8 +423,8 @@ Core.popupInnerHTML = function (isPII, newcat) {
     const catContainer = document.createElement("div");
     catContainer.className = "pii-categories";
 
-    if (newcat && newcat.length > 0) {
-        newcat.forEach(cat => {
+    if (categories && categories.length > 0) {
+        categories.forEach(cat => {
             const span = document.createElement("span");
             span.textContent = cat;
             catContainer.appendChild(span);
@@ -434,11 +435,36 @@ Core.popupInnerHTML = function (isPII, newcat) {
 
     catSection.appendChild(catLabel); 
     catSection.appendChild(catContainer); 
+
+    // const tokenSection = document.createElement("div");
+    // tokenSection.className = "pii-tokens-section";
+
+    // const tokenLabel = document.createElement("strong");
+    // tokenLabel.textContent = "Tokens:";
+
+    // const tokenContainer = document.createElement("div");
+    // tokenContainer.className = "pii-tokens-container";
+
+    // if (tokensHTML) {
+    //     tokensHTML.split(";;;").forEach(pair => {
+    //         const [token, label] = pair.split("|||");
+
+    //         const span = document.createElement("span");
+    //         span.className = "pii-token-chip";
+    //         span.textContent = `${token} (${label})`;
+    //         tokenContainer.appendChild(span);
+    //     })
+    // }
+
+
+    // tokenSection.appendChild(tokenLabel);
+    // tokenSection.appendChild(tokenContainer);
     
     // Assemble 
     popupFrame.appendChild(header); 
     popupFrame.appendChild(statusRow); 
     popupFrame.appendChild(catSection);
+    // popupFrame.appendChild(tokenSection);
 
     return popupFrame;
 }

@@ -32,3 +32,6 @@ OBSERVE-PII detects Personally Identifiable Information (PII) in real-time on us
 - The add-on submitted as a ZIP on Mozilla Add-ons can be reproduced exactly using the source code provided in this package.  
 - All scripts, models, WASM files, and libraries are included as-is. The current `init()` logic (including the `if () await init()` safety guard) is identical to what runs in the published add-on.  
 - No additional build, minification, or bundling is required.
+
+## Version 1.x and 2.x Changes
+- See CHANGELOG.md
