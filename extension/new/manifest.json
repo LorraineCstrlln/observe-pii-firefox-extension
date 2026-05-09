@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "OBSERVE-PII",
-    "version": "2.0",
+    "version": "3.0",
     "description": "OBSERVE-PII detects contextual Personally Identifiable Information (PII) in real time as users interact with text fields and web content, helping them become more aware of potential sensitive data exposure. It identifies various PII categories directly within input fields and visible text to promote safer online behavior. The extension uses an ONNX-based AI model for fast and fully local text processing.",
 
     "icons": {

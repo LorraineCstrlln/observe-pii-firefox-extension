@@ -7,15 +7,20 @@ export async function runInference(session, tokenizer, text) {
     const allRawOffsets = [];
     let isTextContextual = false;
 
-    const TOKEN_THRESHOLD = 0.5;
+    const SENTENCE_THRESHOLD = 0.5;
+    const TOKEN_THRESHOLD = 0.7;
+
+    const HEAD1_TEMP = 1.0308;
+    const HEAD2_TEMP = 0.9638;
 
     try {
         for (const chunk of chunks) {
             const results = await session.run(chunk.feeds);
             const logits1 = Array.from(results.logits_head1.data);
-            const probsHead1 = softMax([logits1[0], logits1[1]]);
+            const scaledHead1 = [logits1[0], logits1[1]].map(v => v / HEAD1_TEMP);
+            const probsHead1 = softMax(scaledHead1);
             
-            if (probsHead1[1] > 0.5) isTextContextual = true;
+            if (probsHead1[1] > SENTENCE_THRESHOLD) isTextContextual = true;
 
             console.log(probsHead1[1])
 
@@ -26,7 +31,8 @@ export async function runInference(session, tokenizer, text) {
             const chunkTokens = chunk.tokenStrings.map((token, i) => {
                 const start = i * numLabels;
                 const logits = logitsHead2.slice(start, start + numLabels);
-                const probs = softMax(logits);
+                const scaledLogits = logits.map(v => v / HEAD2_TEMP);
+                const probs = softMax(scaledLogits);
 
                 // Multi-class logic
                 const piiProbs = probs.slice(1);                // Ignore Other (Class 0)
