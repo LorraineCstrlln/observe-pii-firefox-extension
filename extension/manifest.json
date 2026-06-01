@@ -1,0 +1,55 @@
+{
+    "manifest_version": 3,
+    "name": "OBSERVE-PII",
+    "version": "3.0.1",
+    "description": "OBSERVE-PII detects contextual Personally Identifiable Information (PII) in real time as users interact with text fields and web content, helping them become more aware of potential sensitive data exposure. It identifies various PII categories directly within input fields and visible text to promote safer online behavior. The extension uses an ONNX-based AI model for fast and fully local text processing.",
+
+    "icons": {
+        "48": "icons/observepii_logo1_48.png",
+        "96": "icons/observepii_logo1_96.png",
+        "512": "icons/observepii_logo1_512.png"
+    },
+
+    "background": {
+        "scripts": [
+            "lib/ort.min.js",
+            "background.js"
+        ]
+    },
+
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["content.js"],
+            "css": ["content.css"]
+        }
+    ],
+
+    "permissions": ["scripting", "activeTab"],
+    "host_permissions": ["<all_urls>"],
+
+    "web_accessible_resources": [{
+        "resources": [
+            "model/*",
+            "lib/*",
+            "icons/observepii_logo1_48.png",
+            "icons/observepii_logo1_96.png",
+            "icons/observepii_logo1_512.png"
+        ],
+        "matches": ["<all_urls>"]
+    }],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+    }, 
+
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "wslabproj_observe-pii@up.edu.ph",
+            "strict_min_version": "142.0",
+            "data_collection_permissions": {
+                "required": ["websiteContent"],
+                "optional": []
+            }
+        }
+    }
+}
